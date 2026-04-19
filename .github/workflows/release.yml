@@ -12,11 +12,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: package
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: package repository
         run: |
           zip -9r code.zip . -x '.git/*'
-      - name: release snapshot
+      - name: create snapshot release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: snapshot-${{ github.run_number }}

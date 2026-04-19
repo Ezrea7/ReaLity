@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# lightweight repo entry
 args="$@"
 is_sh_ver="v0.3.18"
-
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 
 if [ -f "$SCRIPT_DIR/src/init.sh" ]; then

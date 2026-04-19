@@ -1,0 +1,5 @@
+# Ignore editor/runtime leftovers
+*.tmp
+*.tmp.*
+*.bak
+.DS_Store
