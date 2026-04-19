@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
 TARGET_DIR="/usr/local/etc/xray/sh"
 BIN_LINK="/usr/local/bin/xtls"
 ALIAS_LINK="/usr/local/bin/XTLS"
@@ -67,5 +70,5 @@ echo "安装完成"
 echo "脚本目录: $TARGET_DIR"
 echo "快捷命令: $BIN_LINK"
 echo "快捷命令: $ALIAS_LINK"
-echo "运行方式: xtls"
+echo -e "运行方式: ${YELLOW}xtls${NC}"
 echo "当前版本: $(grep -E '^[[:space:]]*is_sh_ver=' "$TARGET_DIR/xray.sh" | head -n1 | cut -d'=' -f2 | tr -d '"')"
