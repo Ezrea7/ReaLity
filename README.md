@@ -2,7 +2,7 @@
 
 基于当前菜单式 `xray.sh` 演进的轻量化 Xray 管理脚本仓库。
 
-> 当前阶段：仓库骨架已建立，并已开始第一轮模块化拆分。
+> 当前阶段：仓库骨架已建立，并已进入第二轮模块化拆分。
 
 ## 设计目标
 
@@ -28,7 +28,11 @@ Xray/
    ├─ core.sh
    ├─ download.sh
    ├─ service.sh
-   └─ help.sh
+   ├─ help.sh
+   ├─ config.sh
+   ├─ protocol.sh
+   ├─ share.sh
+   └─ menu.sh
 ```
 
 ## 文件说明
@@ -84,7 +88,48 @@ Xray/
 
 后续会继续扩展为正式帮助说明。
 
+### `src/config.sh`
+已拆出的配置与元数据操作模块。
+
+包含：
+- JSON 修改
+- 端口冲突检查
+- 配置初始化
+- 元数据读写
+- 节点索引与查询
+
+### `src/protocol.sh`
+已拆出的协议实现模块。
+
+包含：
+- Reality 密钥生成
+- SS2022 / Trojan / VMess / VLESS 的入站构建
+- 协议添加逻辑
+
+### `src/share.sh`
+已拆出的分享链接模块。
+
+包含：
+- Quantumult X 链接生成
+- VLESS 标准分享链接生成
+- 分享链接展示
+
+### `src/menu.sh`
+已拆出的交互菜单模块。
+
+包含：
+- 输入交互
+- 节点查看/删除/改端口
+- 添加协议菜单
+- 主菜单入口
+
 ## 安装方式（当前骨架版）
+
+### 一键安装
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Ezrea7/Xray/main/install.sh)
+```
 
 ### 本地安装
 在仓库目录执行：
@@ -120,19 +165,18 @@ xray
 - 建立 GitHub 仓库结构
 - 完成基础安装器与入口脚本
 - 接入按版本号发布的 Release Workflow
-- 完成第一轮模块化拆分（download / service / help）
-- 保持现有核心菜单逻辑继续可运行
+- 完成第二轮模块化拆分（download / service / help / config / protocol / share / menu）
+- 保持现有菜单逻辑继续可运行
 
 ## 后续计划
 
 建议按以下顺序推进：
 
-1. 继续拆分 `src/core.sh`
-2. 拆出 `config.sh`
-3. 拆出 `protocol.sh`
-4. 拆出 `share.sh`
-5. 拆出 `menu.sh`
-6. 完善帮助与安装文档
+1. 清理 `src/core.sh` 中重复的基础函数与全局变量
+2. 继续收缩 `src/core.sh` 为真正的轻核心
+3. 完善 `src/help.sh`
+4. 增强安装器（支持版本安装/Release 安装）
+5. 优化 README 与发布说明
 
 ## 许可说明
 

@@ -1629,4 +1629,3 @@ _main() {
     _xray_menu
 }
 
-_main "$@"
