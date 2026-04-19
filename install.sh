@@ -12,10 +12,11 @@ fi
 
 mkdir -p "$TARGET_DIR"
 cp -rf "$SELF_DIR"/* "$TARGET_DIR/"
-chmod +x "$TARGET_DIR/xray.sh" "$TARGET_DIR/install.sh" 2>/dev/null || true
+chmod +x "$TARGET_DIR/xray.sh" "$TARGET_DIR/install.sh" "$TARGET_DIR/src/"*.sh 2>/dev/null || true
 ln -sf "$TARGET_DIR/xray.sh" "$BIN_LINK"
 
 echo "安装完成"
 echo "脚本目录: $TARGET_DIR"
 echo "快捷命令: $BIN_LINK"
 echo "运行方式: xray"
+echo "当前版本: $(grep -E '^[[:space:]]*is_sh_ver=' "$TARGET_DIR/xray.sh" | head -n1 | cut -d'=' -f2 | tr -d '"')"

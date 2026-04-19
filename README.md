@@ -2,7 +2,7 @@
 
 基于当前菜单式 `xray.sh` 演进的轻量化 Xray 管理脚本仓库。
 
-> 当前阶段：仓库骨架已建立，仍以现有单核心脚本为主，后续逐步模块化拆分。
+> 当前阶段：仓库骨架已建立，并已开始第一轮模块化拆分。
 
 ## 设计目标
 
@@ -25,7 +25,10 @@ Xray/
 │     └─ release.yml
 └─ src/
    ├─ init.sh
-   └─ core.sh
+   ├─ core.sh
+   ├─ download.sh
+   ├─ service.sh
+   └─ help.sh
 ```
 
 ## 文件说明
@@ -43,25 +46,43 @@ Xray/
 当前职责：
 - 将仓库文件安装到目标目录
 - 建立 `/usr/local/bin/xray` 快捷入口
+- 输出当前安装版本
 
 ### `src/init.sh`
 初始化入口。
 
 当前职责：
-- 载入 `src/core.sh`
-- 保证仓库版入口能运行现有核心脚本
+- 初始化全局变量
+- 载入已拆分模块
+- 最后载入当前单体核心 `src/core.sh`
 
 ### `src/core.sh`
 当前核心主脚本。
 
-当前版本直接承载现有菜单式逻辑，后续再逐步拆分为：
-- `config.sh`
-- `service.sh`
-- `protocol.sh`
-- `share.sh`
-- `menu.sh`
-- `help.sh`
-- `download.sh`
+当前仍承载大部分菜单与协议逻辑，后续继续拆分。
+
+### `src/download.sh`
+已拆出的下载与更新模块。
+
+包含：
+- 依赖安装
+- 下载封装
+- Xray 安装/更新
+- 脚本自更新
+
+### `src/service.sh`
+已拆出的服务与卸载模块。
+
+包含：
+- systemd / openrc service 生成
+- 服务启动/停止/重启/状态
+- Xray 卸载
+- 脚本卸载
+
+### `src/help.sh`
+当前帮助占位模块。
+
+后续会继续扩展为正式帮助说明。
 
 ## 安装方式（当前骨架版）
 
@@ -84,32 +105,34 @@ bash install.sh
 xray
 ```
 
+## 发布方式
+
+当前仓库已接入 GitHub Actions：
+
+- push 到 `main`
+- 自动读取 `xray.sh` 中的 `is_sh_ver`
+- 自动打包为 `code.zip`
+- 自动按版本号创建 Release
+
 ## 当前状态说明
 
 当前仓库已经：
 - 建立 GitHub 仓库结构
-- 完成首次推送
-- 接入基础 Release Workflow
-- 将现有脚本纳入仓库管理
-
-但目前仍属于：
-
-> **仓库化第一阶段**
-
-也就是：
-- 先保证仓库有清晰结构
-- 再逐步做真正模块化拆分
-- 尽量避免一次性大改造成不稳定
+- 完成基础安装器与入口脚本
+- 接入按版本号发布的 Release Workflow
+- 完成第一轮模块化拆分（download / service / help）
+- 保持现有核心菜单逻辑继续可运行
 
 ## 后续计划
 
 建议按以下顺序推进：
 
-1. 完善仓库骨架
-2. 强化安装脚本
-3. 拆分 `src/core.sh`
-4. 完善帮助文档
-5. 优化 GitHub Release 发布流程
+1. 继续拆分 `src/core.sh`
+2. 拆出 `config.sh`
+3. 拆出 `protocol.sh`
+4. 拆出 `share.sh`
+5. 拆出 `menu.sh`
+6. 完善帮助与安装文档
 
 ## 许可说明
 

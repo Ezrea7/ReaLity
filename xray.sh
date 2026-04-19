@@ -1,7 +1,7 @@
 #!/bin/bash
 
 args="$@"
-is_sh_ver="v0.3.18"
+is_sh_ver="v0.3.19"
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 
 if [ -f "$SCRIPT_DIR/src/init.sh" ]; then
