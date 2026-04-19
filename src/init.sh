@@ -1,7 +1,10 @@
 #!/bin/bash
 
 args="$@"
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
+
+if [ -z "$SCRIPT_DIR" ] || [ ! -d "$SCRIPT_DIR" ]; then
+    SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+fi
 
 . "$SCRIPT_DIR/src/core.sh"
 . "$SCRIPT_DIR/src/download.sh"
