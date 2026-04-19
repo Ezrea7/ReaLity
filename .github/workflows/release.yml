@@ -1,0 +1,23 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: package
+        run: |
+          zip -9r code.zip . -x '.git/*'
+      - name: release snapshot
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: snapshot-${{ github.run_number }}
+          files: code.zip
