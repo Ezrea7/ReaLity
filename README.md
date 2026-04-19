@@ -141,13 +141,14 @@ bash install.sh
 默认安装到：
 
 - `/usr/local/etc/xray/sh/`
-- `/usr/local/bin/xray`
+- `/usr/local/bin/xtls`
+- `/usr/local/bin/XTLS`
 
 ### 运行
 安装完成后：
 
 ```bash
-xray
+xtls
 ```
 
 ## 发布方式

@@ -2,7 +2,8 @@
 set -e
 
 TARGET_DIR="/usr/local/etc/xray/sh"
-BIN_LINK="/usr/local/bin/xray"
+BIN_LINK="/usr/local/bin/xtls"
+ALIAS_LINK="/usr/local/bin/XTLS"
 SELF_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 ARCHIVE_URL="https://github.com/Ezrea7/Xray/archive/refs/heads/main.zip"
 TMPDIR=""
@@ -43,6 +44,7 @@ fi
 
 need_cmd curl curl
 need_cmd unzip unzip
+need_cmd bash bash
 
 if [ -f "$SELF_DIR/src/core.sh" ] && [ -f "$SELF_DIR/xray.sh" ]; then
   SOURCE_DIR="$SELF_DIR"
@@ -59,9 +61,11 @@ mkdir -p "$TARGET_DIR"
 cp -rf "$SOURCE_DIR"/* "$TARGET_DIR/"
 chmod +x "$TARGET_DIR/xray.sh" "$TARGET_DIR/install.sh" "$TARGET_DIR/src/"*.sh 2>/dev/null || true
 ln -sf "$TARGET_DIR/xray.sh" "$BIN_LINK"
+ln -sf "$TARGET_DIR/xray.sh" "$ALIAS_LINK"
 
 echo "安装完成"
 echo "脚本目录: $TARGET_DIR"
 echo "快捷命令: $BIN_LINK"
-echo "运行方式: xray"
+echo "快捷命令: $ALIAS_LINK"
+echo "运行方式: xtls"
 echo "当前版本: $(grep -E '^[[:space:]]*is_sh_ver=' "$TARGET_DIR/xray.sh" | head -n1 | cut -d'=' -f2 | tr -d '"')"
