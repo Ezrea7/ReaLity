@@ -2,8 +2,8 @@ name: release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -14,11 +14,17 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+      - name: read version
+        id: ver
+        run: |
+          VER="v$(cat VERSION | tr -d '[:space:]')"
+          echo "ver=$VER" >> "$GITHUB_OUTPUT"
       - name: package repository
         run: |
           zip -9r code.zip . -x '.git/*'
       - name: create release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ steps.ver.outputs.ver }}
           files: code.zip
+          generate_release_notes: true

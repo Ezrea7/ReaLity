@@ -173,16 +173,14 @@ xtls
 
 当前仓库已接入 GitHub Actions：
 
-- 仅在推送 `v*` 标签时发布
+- push 到 `main` 默认发行
+- 自动读取 `VERSION`
 - 自动打包为 `code.zip`
-- 自动以标签名创建 Release
+- 自动按版本号创建 / 更新 Release
 
-### 发布示例
+### 当前约定
 
-```bash
-git tag v0.3.21
-git push origin v0.3.21
-```
+每次提交默认同步提升 `VERSION`，以保证安装与更新时可直观看到最新版本。
 
 ## 当前状态说明
 
