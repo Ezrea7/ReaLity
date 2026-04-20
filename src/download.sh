@@ -136,12 +136,13 @@ _install_or_update_xray ()
 
 _install_or_update_singbox () 
 { 
-    local current_ver arch arch_tag libc_suffix api_url search_pattern release_info download_url checksum_url checksums dl_filename expected_hash actual_hash temp_dir;
-    if [ -x "$SINGBOX_BIN" ]; then
+    local is_first_install=false current_ver arch arch_tag libc_suffix api_url search_pattern release_info download_url checksum_url checksums dl_filename expected_hash actual_hash temp_dir;
+    [ ! -x "$SINGBOX_BIN" ] && is_first_install=true;
+    if [ "$is_first_install" = true ]; then
+        _info "Sing-box 核心未安装，正在执行首次安装...";
+    else
         current_ver=$($SINGBOX_BIN version 2> /dev/null | head -n1);
         _info "当前 Sing-box 版本: ${current_ver}，正在检查更新...";
-    else
-        _info "Sing-box 核心未安装，正在执行首次安装...";
     fi;
     arch=$(uname -m);
     case "$arch" in
@@ -180,9 +181,16 @@ _install_or_update_singbox ()
     rm -rf "$temp_dir";
     _init_singbox_config;
     _create_singbox_service;
+    if [ "$is_first_install" = true ]; then
+        _info "首次安装 Sing-box，正在初始化配置与服务...";
+        _manage_singbox_service start;
+        _success "Sing-box 首次安装已完成，服务已启动。";
+    else
+        _manage_singbox_service restart;
+    fi;
     if [ -x "$SINGBOX_BIN" ]; then
         _success "Sing-box 核心安装/更新完成：$($SINGBOX_BIN version 2>/dev/null | head -n1)";
-    fi;
+    fi
 }
 _update_script_self () 
 { 
