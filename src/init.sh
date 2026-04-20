@@ -10,6 +10,7 @@ fi
 . "$SCRIPT_DIR/src/core.sh"
 . "$SCRIPT_DIR/src/download.sh"
 . "$SCRIPT_DIR/src/service.sh"
+. "$SCRIPT_DIR/src/singbox.sh"
 . "$SCRIPT_DIR/src/help.sh"
 . "$SCRIPT_DIR/src/config.sh"
 . "$SCRIPT_DIR/src/share.sh"

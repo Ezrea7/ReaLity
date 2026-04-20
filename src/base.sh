@@ -4,7 +4,7 @@
 #      Xray base module
 # ============================================================
 
-SCRIPT_VERSION="$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo 0.3.21)"
+SCRIPT_VERSION="$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo 0.3.22)"
 SCRIPT_CMD_NAME="xtls"
 SCRIPT_CMD_ALIAS="XTLS"
 SCRIPT_INSTALL_PATH="/usr/local/bin/${SCRIPT_CMD_NAME}"
@@ -15,6 +15,10 @@ XRAY_BIN="/usr/local/bin/xray"
 XRAY_DIR="/usr/local/etc/xray"
 XRAY_CONFIG="${XRAY_DIR}/config.json"
 XRAY_PID_FILE="/tmp/xray.pid"
+SINGBOX_BIN="/usr/local/bin/sing-box"
+SINGBOX_DIR="/usr/local/etc/sing-box"
+SINGBOX_CONFIG="${SINGBOX_DIR}/config.json"
+SINGBOX_PID_FILE="/tmp/sing-box.pid"
 META_DIR="/usr/local/etc/xtls"
 META_FILE="${META_DIR}/metadata.json"
 DEFAULT_SNI=""

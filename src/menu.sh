@@ -306,13 +306,17 @@ _add_protocol_menu ()
     local choice;
     echo "";
     echo -e "${YELLOW}══════════ 选择要添加的协议 ══════════${NC}";
+    echo -e " ${CYAN}【Xray 内核】${NC}";
     echo -e "  ${GREEN}[1]${NC} VLESS + Vision + Reality";
     echo -e "  ${GREEN}[2]${NC} SS2022 + Reality";
     echo -e "  ${GREEN}[3]${NC} Trojan + Reality";
     echo -e "  ${GREEN}[4]${NC} VMess + Reality";
+    echo "";
+    echo -e " ${CYAN}【Sing-box 内核】${NC}";
+    echo -e "  ${GREEN}[5]${NC} AnyTLS + Reality";
     echo -e "  ${RED}[0]${NC} 返回上一级";
     echo "";
-    read -p "请选择 [0-4]: " choice;
+    read -p "请选择 [0-5]: " choice;
     case "$choice" in 
         1 | 2 | 3 | 4)
             _require_xray || return 1;
@@ -332,6 +336,11 @@ _add_protocol_menu ()
                 ;;
             esac
         ;;
+        5)
+            _require_singbox || return 1;
+            _init_singbox_config;
+            _protocol_add_node anytls_reality
+        ;;
         0)
             return 0
         ;;
@@ -348,26 +357,33 @@ _xray_menu ()
         echo "";
         echo -e "==================================================";
         echo -e " Xray Reality 协议管理脚本 v${SCRIPT_VERSION}";
-        echo -e " 当前协议组合: Xray / Reality";
+        echo -e " 当前协议组合: Xray + Sing-box / Reality";
         _show_xray_runtime_summary;
         echo -e "==================================================";
         echo -e " ${CYAN}【核心管理】${NC}";
         _menu_item 1 "安装/更新 Xray 内核";
+        _menu_item 2 "安装/更新 Sing-box 内核";
         echo "";
         echo -e " ${CYAN}【Xray 服务管理】${NC}";
-        _menu_item 2 "启动 Xray 服务";
-        _menu_item 3 "停止 Xray 服务";
-        _menu_item 4 "重启 Xray 服务";
+        _menu_item 3 "启动 Xray 服务";
+        _menu_item 4 "停止 Xray 服务";
+        _menu_item 5 "重启 Xray 服务";
+        echo "";
+        echo -e " ${CYAN}【Sing-box 服务管理】${NC}";
+        _menu_item 6 "启动 Sing-box 服务";
+        _menu_item 7 "停止 Sing-box 服务";
+        _menu_item 8 "重启 Sing-box 服务";
         echo "";
         echo -e " ${CYAN}【节点管理】${NC}";
-        _menu_item 5 "添加节点（选择协议）";
-        _menu_item 6 "查看节点";
-        _menu_item 7 "删除节点";
-        _menu_item 8 "修改节点端口";
-        _menu_item 9 "设置网络优先级 (IPv4/IPv6)";
+        _menu_item 9 "添加节点（选择协议）";
+        _menu_item 10 "查看节点";
+        _menu_item 11 "删除节点";
+        _menu_item 12 "修改节点端口";
+        _menu_item 13 "设置网络优先级 (IPv4/IPv6)";
         echo "";
         echo -e " ${CYAN}【脚本与卸载】${NC}";
         _menu_danger 55 "更新脚本";
+        _menu_danger 77 "卸载 Sing-box 内核";
         _menu_danger 88 "卸载 Xray 内核";
         _menu_danger 99 "卸载脚本";
         _menu_exit 0 "退出脚本";
@@ -375,59 +391,43 @@ _xray_menu ()
         read -p "请选择 [0-99]: " choice;
         case "$choice" in 
             1)
-                _install_or_update_xray;
-                _pause
-            ;;
+                _install_or_update_xray; _pause ;;
             2)
-                [ -f "$XRAY_BIN" ] && _manage_xray_service start;
-                _pause
-            ;;
+                _install_or_update_singbox; _pause ;;
             3)
-                [ -f "$XRAY_BIN" ] && _manage_xray_service stop;
-                _pause
-            ;;
+                [ -f "$XRAY_BIN" ] && _manage_xray_service start; _pause ;;
             4)
-                [ -f "$XRAY_BIN" ] && _manage_xray_service restart;
-                _pause
-            ;;
+                [ -f "$XRAY_BIN" ] && _manage_xray_service stop; _pause ;;
             5)
-                _add_protocol_menu;
-                _pause
-            ;;
+                [ -f "$XRAY_BIN" ] && _manage_xray_service restart; _pause ;;
             6)
-                _protocol_view_nodes;
-                _pause
-            ;;
+                [ -f "$SINGBOX_BIN" ] && _manage_singbox_service start; _pause ;;
             7)
-                _protocol_delete_node;
-                _pause
-            ;;
+                [ -f "$SINGBOX_BIN" ] && _manage_singbox_service stop; _pause ;;
             8)
-                _protocol_modify_port;
-                _pause
-            ;;
+                [ -f "$SINGBOX_BIN" ] && _manage_singbox_service restart; _pause ;;
             9)
-                _choose_ip_preference
-            ;;
+                _add_protocol_menu; _pause ;;
+            10)
+                _protocol_view_nodes; _pause ;;
+            11)
+                _protocol_delete_node; _pause ;;
+            12)
+                _protocol_modify_port; _pause ;;
+            13)
+                _choose_ip_preference ;;
             55)
-                _update_script_self;
-                _pause;
-                exit 0
-            ;;
+                _update_script_self; _pause; exit 0 ;;
+            77)
+                _uninstall_singbox; _pause ;;
             88)
-                _uninstall_xray;
-                _pause
-            ;;
+                _uninstall_xray; _pause ;;
             99)
-                _uninstall_script
-            ;;
+                _uninstall_script ;;
             0)
-                exit 0
-            ;;
+                exit 0 ;;
             *)
-                _error "无效输入。";
-                _pause
-            ;;
+                _error "无效输入。"; _pause ;;
         esac;
     done
 }

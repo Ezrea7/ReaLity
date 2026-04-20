@@ -50,7 +50,7 @@ _pkg_install ()
 _ensure_deps () 
 { 
     local missing="" still_missing="" c;
-    for c in bash jq openssl awk sed grep unzip;
+    for c in bash jq openssl awk sed grep unzip tar;
     do
         command -v "$c" > /dev/null 2>&1 || missing="$missing $c";
     done;
@@ -60,7 +60,7 @@ _ensure_deps ()
         [ -f /etc/ssl/certs/ca-certificates.crt ] || missing="$missing ca-certificates";
     fi;
     [ -n "$missing" ] && _pkg_install $missing;
-    for c in bash jq openssl awk sed grep unzip;
+    for c in bash jq openssl awk sed grep unzip tar;
     do
         command -v "$c" > /dev/null 2>&1 || still_missing="$still_missing $c";
     done;
@@ -132,6 +132,57 @@ _install_or_update_xray ()
     else
         _manage_xray_service restart;
     fi
+}
+
+_install_or_update_singbox () 
+{ 
+    local current_ver arch arch_tag libc_suffix api_url search_pattern release_info download_url checksum_url checksums dl_filename expected_hash actual_hash temp_dir;
+    if [ -x "$SINGBOX_BIN" ]; then
+        current_ver=$($SINGBOX_BIN version 2> /dev/null | head -n1);
+        _info "当前 Sing-box 版本: ${current_ver}，正在检查更新...";
+    else
+        _info "Sing-box 核心未安装，正在执行首次安装...";
+    fi;
+    arch=$(uname -m);
+    case "$arch" in
+        x86_64|amd64) arch_tag='amd64' ;;
+        aarch64|arm64) arch_tag='arm64' ;;
+        armv7l) arch_tag='armv7' ;;
+        *) _error "不支持的架构：$arch"; return 1 ;;
+    esac;
+    libc_suffix="";
+    if ldd --version 2>&1 | grep -qi musl || [ -f /etc/alpine-release ]; then
+        libc_suffix='-musl';
+    fi;
+    api_url="https://api.github.com/repos/SagerNet/sing-box/releases/latest";
+    search_pattern="linux-${arch_tag}${libc_suffix}.tar.gz";
+    release_info=$(curl -fsSL "$api_url") || { _error "获取 sing-box release 信息失败。"; return 1; };
+    download_url=$(printf '%s' "$release_info" | jq -r ".assets[] | select(.name | contains(\"${search_pattern}\")) | .browser_download_url" | head -1);
+    checksum_url=$(printf '%s' "$release_info" | jq -r '.assets[] | select(.name | endswith("checksums.txt")) | .browser_download_url' | head -1);
+    [ -n "$download_url" ] || { _error "无法获取 sing-box 下载链接。"; return 1; };
+    temp_dir=$(mktemp -d);
+    _download_to "$download_url" "$temp_dir/sing-box.tar.gz" || { rm -rf "$temp_dir"; _error "sing-box 下载失败。"; return 1; };
+    if [ -n "$checksum_url" ]; then
+        checksums=$(curl -fsSL "$checksum_url" 2>/dev/null || true);
+        if [ -n "$checksums" ]; then
+            dl_filename=$(basename "$download_url");
+            expected_hash=$(printf '%s' "$checksums" | grep "$dl_filename" | awk '{print $1}' | head -1);
+            if [ -n "$expected_hash" ]; then
+                actual_hash=$(sha256sum "$temp_dir/sing-box.tar.gz" | awk '{print $1}');
+                [ "$expected_hash" = "$actual_hash" ] || { rm -rf "$temp_dir"; _error "sing-box SHA256 校验失败。"; return 1; };
+            fi;
+        fi;
+    fi;
+    tar -xzf "$temp_dir/sing-box.tar.gz" -C "$temp_dir" || { rm -rf "$temp_dir"; _error "sing-box 解压失败。"; return 1; };
+    mkdir -p "$(dirname "$SINGBOX_BIN")" "$SINGBOX_DIR";
+    mv "$temp_dir"/sing-box-*/sing-box "$SINGBOX_BIN" || { rm -rf "$temp_dir"; _error "未找到 sing-box 二进制。"; return 1; };
+    chmod +x "$SINGBOX_BIN";
+    rm -rf "$temp_dir";
+    _init_singbox_config;
+    _create_singbox_service;
+    if [ -x "$SINGBOX_BIN" ]; then
+        _success "Sing-box 核心安装/更新完成：$($SINGBOX_BIN version 2>/dev/null | head -n1)";
+    fi;
 }
 _update_script_self () 
 { 

@@ -4,6 +4,8 @@
 
 > 当前阶段：仓库骨架已建立，并已完成第三阶段关键收尾项。
 
+> 当前发布版本：`v0.3.21`
+
 ## 设计目标
 
 - **基于现有脚本继续演进**，不照抄大型命令体系
@@ -91,9 +93,10 @@ Xray/
 已拆出的服务与卸载模块。
 
 包含：
-- systemd / openrc service 生成
-- 服务启动/停止/重启/状态
-- Xray 卸载
+- Xray systemd / openrc service 生成
+- Sing-box systemd / openrc service 生成
+- Xray / Sing-box 服务启动/停止/重启/状态
+- Xray / Sing-box 卸载
 - 脚本卸载
 
 ### `src/help.sh`
@@ -116,7 +119,8 @@ Xray/
 
 包含：
 - Reality 密钥生成
-- SS2022 / Trojan / VMess / VLESS 的入站构建
+- Sing-box AnyTLS + Reality 密钥生成
+- SS2022 / Trojan / VMess / VLESS / AnyTLS 的入站构建
 - 协议添加逻辑
 
 ### `src/share.sh`
@@ -125,6 +129,7 @@ Xray/
 包含：
 - Quantumult X 链接生成
 - VLESS 标准分享链接生成
+- AnyTLS + Reality Quantumult X 链接生成
 - 分享链接展示
 
 ### `src/menu.sh`
@@ -185,11 +190,13 @@ git push origin v0.3.21
 - 建立 GitHub 仓库结构
 - 完成基础安装器与入口脚本
 - 接入按标签发布的 Release Workflow
-- 完成第二轮模块化拆分（download / service / help / config / protocol / share / menu）
-- 完成第三阶段第一轮清理，引入 `base.sh`
+- 完成模块化拆分（download / service / help / config / protocol / share / menu）
+- 引入 `base.sh`
 - 将 `core.sh` 收缩为最小壳层，实际逻辑由模块承载
 - 安装器改为从 GitHub Release 获取最新 `code.zip`
 - 更新逻辑改为按仓库 Release 更新
+- 已加入 Sing-box 内核安装 / 服务 / 卸载能力
+- 已加入 AnyTLS + Reality 协议支持（基于 Sing-box）
 - 保持现有菜单逻辑继续可运行
 
 ## 后续计划

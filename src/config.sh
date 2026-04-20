@@ -24,7 +24,7 @@ _apply_xray_json_change ()
 _check_core_functions () 
 { 
     local fn missing="";
-    for fn in _atomic_modify_json _apply_xray_json_change _manage_xray_service _init_xray_config _protocol_add_node _build_protocol_share_link;
+    for fn in _atomic_modify_json _apply_xray_json_change _manage_xray_service _manage_singbox_service _init_xray_config _init_singbox_config _protocol_add_node _build_protocol_share_link;
     do
         if ! command -v "$fn" > /dev/null 2>&1; then
             missing="$missing $fn";
@@ -40,13 +40,17 @@ _check_port_occupied ()
 { 
     local port="$1" proto="${2:-tcp}";
     if command -v ss > /dev/null 2>&1; then
-        if ss -lntup 2> /dev/null | awk -v p=":${port}" '$0 ~ p {found=1} END{exit !found}'; then
-            return 0;
+        if [ "$proto" = "tcp" ]; then
+            ss -lntup 2> /dev/null | awk -v p=":${port}" '$0 ~ p {found=1} END{exit !found}' && return 0;
+        else
+            ss -lnup 2> /dev/null | awk -v p=":${port}" '$0 ~ p {found=1} END{exit !found}' && return 0;
         fi;
     else
         if command -v netstat > /dev/null 2>&1; then
-            if netstat -lntup 2> /dev/null | awk -v p=":${port}" '$0 ~ p {found=1} END{exit !found}'; then
-                return 0;
+            if [ "$proto" = "tcp" ]; then
+                netstat -lntup 2> /dev/null | awk -v p=":${port}" '$0 ~ p {found=1} END{exit !found}' && return 0;
+            else
+                netstat -lnup 2> /dev/null | awk -v p=":${port}" '$0 ~ p {found=1} END{exit !found}' && return 0;
             fi;
         fi;
     fi;
@@ -56,6 +60,9 @@ _check_port_in_configs ()
 { 
     local port="$1";
     if [ -f "$XRAY_CONFIG" ] && jq -e --argjson p "$port" '.inbounds[] | select(.port == $p)' "$XRAY_CONFIG" > /dev/null 2>&1; then
+        return 0;
+    fi;
+    if [ -f "$SINGBOX_CONFIG" ] && jq -e --argjson p "$port" '.inbounds[] | select(.listen_port == $p)' "$SINGBOX_CONFIG" > /dev/null 2>&1; then
         return 0;
     fi;
     return 1
@@ -100,8 +107,13 @@ JSON
 }
 _get_inbound_field () 
 { 
-    local tag="$1" field="$2";
-    jq --arg tag "$tag" -r ".inbounds[] | select(.tag == \$tag) | ${field} // empty" "$XRAY_CONFIG" 2> /dev/null
+    local tag="$1" field="$2" protocol;
+    protocol=$(_get_meta_field "$tag" protocol);
+    if [ "$protocol" = "anytls_reality" ]; then
+        jq --arg tag "$tag" -r ".inbounds[] | select(.tag == \$tag) | ${field} // empty" "$SINGBOX_CONFIG" 2> /dev/null;
+    else
+        jq --arg tag "$tag" -r ".inbounds[] | select(.tag == \$tag) | ${field} // empty" "$XRAY_CONFIG" 2> /dev/null;
+    fi
 }
 _get_meta_field () 
 { 
@@ -135,12 +147,22 @@ _get_tag_name ()
 }
 _get_inbound_port () 
 { 
-    local tag="$1";
-    jq --arg tag "$tag" -r '.inbounds[] | select(.tag == $tag) | .port // empty' "$XRAY_CONFIG" 2> /dev/null
+    local tag="$1" protocol;
+    protocol=$(_get_meta_field "$tag" protocol);
+    if [ "$protocol" = "anytls_reality" ]; then
+        jq --arg tag "$tag" -r '.inbounds[] | select(.tag == $tag) | .listen_port // empty' "$SINGBOX_CONFIG" 2> /dev/null;
+    else
+        jq --arg tag "$tag" -r '.inbounds[] | select(.tag == $tag) | .port // empty' "$XRAY_CONFIG" 2> /dev/null;
+    fi
 }
 _get_inbound_display_protocol () 
 { 
-    local tag="$1";
+    local tag="$1" protocol;
+    protocol=$(_get_meta_field "$tag" protocol);
+    if [ "$protocol" = "anytls_reality" ]; then
+        echo "anytls+reality+tcp";
+        return 0;
+    fi;
     local proto network security;
     proto=$(_get_inbound_field "$tag" '.protocol');
     network=$(_get_inbound_field "$tag" '.streamSettings.network // "raw"');
@@ -149,11 +171,11 @@ _get_inbound_display_protocol ()
 }
 _list_tags () 
 { 
-    jq -r '.inbounds[].tag' "$XRAY_CONFIG" 2> /dev/null | awk 'NF && !seen[$0]++'
+    { jq -r '.inbounds[].tag' "$XRAY_CONFIG" 2> /dev/null; jq -r '.inbounds[].tag' "$SINGBOX_CONFIG" 2> /dev/null; } | awk 'NF && !seen[$0]++'
 }
 _has_nodes () 
 { 
-    [ -f "$XRAY_CONFIG" ] && jq -e '.inbounds | length > 0' "$XRAY_CONFIG" > /dev/null 2>&1
+    ([ -f "$XRAY_CONFIG" ] && jq -e '.inbounds | length > 0' "$XRAY_CONFIG" >/dev/null 2>&1) || ([ -f "$SINGBOX_CONFIG" ] && jq -e '.inbounds | length > 0' "$SINGBOX_CONFIG" >/dev/null 2>&1)
 }
 _select_tag () 
 { 
@@ -180,17 +202,21 @@ _select_tag ()
 }
 _delete_inbound_by_tag () 
 { 
-    local tag="$1";
-    _apply_xray_json_change "del(.inbounds[] | select(.tag == \"$tag\"))" || { 
-        _error "删除节点配置失败。";
-        return 1
-    }
+    local tag="$1" protocol;
+    protocol=$(_get_meta_field "$tag" protocol);
+    if [ "$protocol" = "anytls_reality" ]; then
+        _atomic_modify_json "$SINGBOX_CONFIG" "del(.inbounds[] | select(.tag == \"$tag\"))" || { _error "删除节点配置失败。"; return 1; };
+    else
+        _apply_xray_json_change "del(.inbounds[] | select(.tag == \"$tag\"))" || { _error "删除节点配置失败。"; return 1; };
+    fi
 }
 _update_inbound_port_and_tag () 
 { 
-    local tag="$1" new_port="$2" new_tag="$3";
-    _apply_xray_json_change "(.inbounds[] | select(.tag == \"$tag\") | .port) = $new_port | (.inbounds[] | select(.tag == \"$tag\") | .tag) = \"$new_tag\"" || { 
-        _error "更新节点端口失败。";
-        return 1
-    }
+    local tag="$1" new_port="$2" new_tag="$3" protocol;
+    protocol=$(_get_meta_field "$tag" protocol);
+    if [ "$protocol" = "anytls_reality" ]; then
+        _atomic_modify_json "$SINGBOX_CONFIG" "(.inbounds[] | select(.tag == \"$tag\") | .listen_port) = $new_port | (.inbounds[] | select(.tag == \"$tag\") | .tag) = \"$new_tag\" | (.inbounds[] | select(.tag == \"$new_tag\") | .users[0].name) = \"$new_tag\"" || { _error "更新节点端口失败。"; return 1; };
+    else
+        _apply_xray_json_change "(.inbounds[] | select(.tag == \"$tag\") | .port) = $new_port | (.inbounds[] | select(.tag == \"$tag\") | .tag) = \"$new_tag\"" || { _error "更新节点端口失败。"; return 1; };
+    fi
 }

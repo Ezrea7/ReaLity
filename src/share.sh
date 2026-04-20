@@ -22,6 +22,9 @@ _build_protocol_share_link ()
         vless_vision_reality)
             _build_vless_vision_reality_link "$tag"
         ;;
+        anytls_reality)
+            _build_anytls_reality_link "$tag"
+        ;;
         *)
             return 1
         ;;
@@ -65,7 +68,11 @@ _show_vless_standard_share_link ()
 _finalize_added_node () 
 { 
     local protocol_label="$1" name="$2" tag="$3";
-    _manage_xray_service restart;
+    if [ "$(_protocol_of_tag "$tag")" = "anytls_reality" ]; then
+        _manage_singbox_service restart;
+    else
+        _manage_xray_service restart;
+    fi;
     _success "${protocol_label} 节点添加完成：${name}。";
     _show_share_link "$tag";
     if [ "$(_protocol_of_tag "$tag")" = "vless_vision_reality" ]; then
@@ -97,7 +104,7 @@ _build_ss2022_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'shadowsocks=%s:%s, method=%s, password=%s, obfs=over-tls, obfs-host=%s, tls-verification=true, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$method" "$password" "$sni" "$public_key" "$short_id" "$name"
+    printf 'shadowsocks=%s:%s, method=%s, password=%s, obfs=over-tls, obfs-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$method" "$password" "$sni" "$public_key" "$short_id" "$name"
 }
 _build_trojan_reality_link () 
 { 
@@ -118,7 +125,7 @@ _build_trojan_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'trojan=%s:%s, password=%s, over-tls=true, tls-host=%s, tls-verification=true, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$password" "$sni" "$public_key" "$short_id" "$name"
+    printf 'trojan=%s:%s, password=%s, over-tls=true, tls-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$password" "$sni" "$public_key" "$short_id" "$name"
 }
 _build_vmess_reality_link () 
 { 
@@ -139,7 +146,7 @@ _build_vmess_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'vmess=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, tls-verification=true, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
+    printf 'vmess=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
 }
 _build_vless_vision_reality_std_link () 
 { 
@@ -182,5 +189,27 @@ _build_vless_vision_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'vless=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, tls-verification=true, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, vless-flow=xtls-rprx-vision, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
+    printf 'vless=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, vless-flow=xtls-rprx-vision, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
+}
+
+_build_anytls_reality_link () 
+{ 
+    local tag="$1";
+    local port name password sni public_key short_id server_ip link_ip;
+    port=$(jq --arg tag "$tag" -r '.inbounds[] | select(.tag == $tag) | .listen_port // empty' "$SINGBOX_CONFIG" 2>/dev/null);
+    [ -n "$port" ] || return 1;
+    name=$(_get_tag_name "$tag");
+    password=$(_get_meta_field "$tag" password);
+    sni=$(_get_meta_field "$tag" sni);
+    public_key=$(_get_meta_field "$tag" publicKey);
+    short_id=$(_get_meta_field "$tag" shortId);
+    server_ip=$(_get_meta_field "$tag" server);
+    [ -n "$password" ] || return 1;
+    [ -n "$sni" ] || return 1;
+    [ -n "$public_key" ] || return 1;
+    [ -n "$short_id" ] || return 1;
+    [ -n "$server_ip" ] || return 1;
+    link_ip="$server_ip";
+    [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
+    printf 'anytls=%s:%s, password=%s, over-tls=true, tls-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$password" "$sni" "$public_key" "$short_id" "$name"
 }

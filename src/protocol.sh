@@ -15,6 +15,22 @@ _generate_reality_keys ()
         return 1;
     fi
 }
+
+_generate_singbox_reality_keys () 
+{ 
+    local keypair;
+    [ -x "$SINGBOX_BIN" ] || { _error "Sing-box 内核未安装。"; return 1; };
+    keypair=$($SINGBOX_BIN generate reality-keypair 2>&1);
+    SINGBOX_REALITY_PRIVATE_KEY=$(echo "$keypair" | awk '/PrivateKey/ {print $2; exit}');
+    SINGBOX_REALITY_PUBLIC_KEY=$(echo "$keypair" | awk '/PublicKey/ {print $2; exit}');
+    SINGBOX_REALITY_SHORT_ID=$($SINGBOX_BIN generate rand --hex 8 2>/dev/null);
+    [ -n "$SINGBOX_REALITY_SHORT_ID" ] || SINGBOX_REALITY_SHORT_ID=$(openssl rand -hex 8);
+    if [ -z "$SINGBOX_REALITY_PRIVATE_KEY" ] || [ -z "$SINGBOX_REALITY_PUBLIC_KEY" ]; then
+        _error "Sing-box Reality 密钥生成失败。";
+        echo "$keypair" 1>&2;
+        return 1;
+    fi
+}
 _build_reality_stream () 
 { 
     local network="$1" sni="$2" private_key="$3" short_id="$4";
@@ -47,6 +63,9 @@ _protocol_name ()
         vless_vision_reality)
             echo "VLESS + Vision + Reality"
         ;;
+        anytls_reality)
+            echo "AnyTLS + Reality"
+        ;;
         *)
             echo "$1"
         ;;
@@ -68,6 +87,9 @@ _protocol_default_name ()
         vless_vision_reality)
             printf 'VLESS-REALITY-VISION-%s\n' "$port"
         ;;
+        anytls_reality)
+            printf 'ANYTLS-REALITY-%s\n' "$port"
+        ;;
         *)
             printf '%s-%s\n' "$protocol" "$port"
         ;;
@@ -88,6 +110,9 @@ _protocol_add_node ()
         ;;
         vless_vision_reality)
             _add_vless_vision_reality
+        ;;
+        anytls_reality)
+            _add_anytls_reality
         ;;
         *)
             _error "暂不支持的协议: $protocol";
@@ -265,4 +290,58 @@ _add_vless_vision_reality ()
     qx_link=$(_build_vless_vision_reality_link "$tag" 2> /dev/null);
     _save_meta_bundle "$tag" "$name" "$qx_link" "protocol=${protocol}" "uuid=${uuid}" "publicKey=${REALITY_PUBLIC_KEY}" "shortId=${REALITY_SHORT_ID}" "server=${node_ip}" "sni=${sni}";
     _finalize_added_node "VLESS+Vision+Reality" "$name" "$tag"
+}
+
+_build_anytls_reality_inbound () 
+{ 
+    local tag="$1" port="$2" password="$3" sni="$4" private_key="$5" short_id="$6";
+    jq -n --arg t "$tag" --argjson p "$port" --arg pw "$password" --arg sn "$sni" --arg pk "$private_key" --arg sid "$short_id" '
+        {
+          "type": "anytls",
+          "tag": $t,
+          "listen": "::",
+          "listen_port": $p,
+          "users": [
+            {
+              "name": $t,
+              "password": $pw
+            }
+          ],
+          "tls": {
+            "enabled": true,
+            "server_name": $sn,
+            "reality": {
+              "enabled": true,
+              "handshake": {
+                "server": $sn,
+                "server_port": 443
+              },
+              "private_key": $pk,
+              "short_id": [
+                $sid
+              ]
+            }
+          }
+        }'
+}
+
+_add_anytls_reality () 
+{ 
+    local protocol node_ip port sni name tag password inbound qx_link;
+    protocol="anytls_reality";
+    _require_singbox || return 1;
+    _init_singbox_config;
+    node_ip=$(_input_node_ip);
+    port=$(_input_port);
+    sni=$(_input_sni "$DEFAULT_SNI");
+    read -p "请输入 AnyTLS 密码 (回车自动生成): " password;
+    [ -n "$password" ] || password=$(openssl rand -hex 16);
+    _generate_singbox_reality_keys || return 1;
+    name=$(_input_node_name "$protocol" "$port") || return 1;
+    tag="$name";
+    inbound=$(_build_anytls_reality_inbound "$tag" "$port" "$password" "$sni" "$SINGBOX_REALITY_PRIVATE_KEY" "$SINGBOX_REALITY_SHORT_ID");
+    _atomic_modify_json "$SINGBOX_CONFIG" ".inbounds += [$inbound]" || return 1;
+    qx_link=$(_build_anytls_reality_link "$tag" 2> /dev/null);
+    _save_meta_bundle "$tag" "$name" "$qx_link" "protocol=${protocol}" "password=${password}" "publicKey=${SINGBOX_REALITY_PUBLIC_KEY}" "shortId=${SINGBOX_REALITY_SHORT_ID}" "server=${node_ip}" "sni=${sni}";
+    _finalize_added_node "AnyTLS+Reality" "$name" "$tag"
 }
