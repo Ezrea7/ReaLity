@@ -104,7 +104,7 @@ _build_ss2022_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'shadowsocks=%s:%s, method=%s, password=%s, obfs=over-tls, obfs-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$method" "$password" "$sni" "$public_key" "$short_id" "$name"
+    printf 'shadowsocks=%s:%s, method=%s, password=%s, obfs=over-tls, obfs-host=%s, tls-verification=false, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$method" "$password" "$sni" "$public_key" "$short_id" "$name"
 }
 _build_trojan_reality_link () 
 { 
@@ -125,7 +125,7 @@ _build_trojan_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'trojan=%s:%s, password=%s, over-tls=true, tls-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$password" "$sni" "$public_key" "$short_id" "$name"
+    printf 'trojan=%s:%s, password=%s, over-tls=true, tls-host=%s, tls-verification=false, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$password" "$sni" "$public_key" "$short_id" "$name"
 }
 _build_vmess_reality_link () 
 { 
@@ -146,7 +146,7 @@ _build_vmess_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'vmess=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
+    printf 'vmess=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, tls-verification=false, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
 }
 _build_vless_vision_reality_std_link () 
 { 
@@ -189,7 +189,7 @@ _build_vless_vision_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'vless=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, vless-flow=xtls-rprx-vision, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
+    printf 'vless=%s:%s, method=none, password=%s, obfs=over-tls, obfs-host=%s, tls-verification=false, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, vless-flow=xtls-rprx-vision, tag=%s\n' "$link_ip" "$port" "$uuid" "$sni" "$public_key" "$short_id" "$name"
 }
 
 _build_anytls_reality_link () 
@@ -211,5 +211,5 @@ _build_anytls_reality_link ()
     [ -n "$server_ip" ] || return 1;
     link_ip="$server_ip";
     [[ "$link_ip" == *":"* ]] && link_ip="[$link_ip]";
-    printf 'anytls=%s:%s, password=%s, over-tls=true, tls-host=%s, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$password" "$sni" "$public_key" "$short_id" "$name"
+    printf 'anytls=%s:%s, password=%s, over-tls=true, tls-host=%s, tls-verification=false, reality-base64-pubkey=%s, reality-hex-shortid=%s, udp-relay=true, tag=%s\n' "$link_ip" "$port" "$password" "$sni" "$public_key" "$short_id" "$name"
 }
