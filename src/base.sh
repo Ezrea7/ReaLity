@@ -4,7 +4,7 @@
 #      Xray base module
 # ============================================================
 
-SCRIPT_VERSION="$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo 0.3.26)"
+SCRIPT_VERSION="$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo 0.3.29)"
 SCRIPT_CMD_NAME="xtls"
 SCRIPT_CMD_ALIAS="XTLS"
 SCRIPT_INSTALL_PATH="/usr/local/bin/${SCRIPT_CMD_NAME}"
