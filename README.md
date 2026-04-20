@@ -10,7 +10,7 @@
 
 </div>
 
-> 当前发布版本：`v0.3.35`
+> 当前发布版本：`v0.3.36`
 
 ## ✨ 功能特性
 
@@ -40,6 +40,21 @@
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Ezrea7/ReaLity/main/install.sh)
+```
+
+### 安装完成后的快速检查
+
+如需确认脚本是否安装到正确位置，可手动执行：
+
+```bash
+readlink -f /usr/local/bin/xtls
+head -n 4 /usr/local/etc/xray/sh/xray.sh
+```
+
+正常情况下，快捷命令应指向：
+
+```text
+/usr/local/etc/xray/sh/xray.sh
 ```
 
 ## 快捷指令
