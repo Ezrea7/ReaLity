@@ -7,7 +7,6 @@
 [![Protocol](https://img.shields.io/badge/protocol-SS2022%2BReality-orange.svg)]()
 [![Init](https://img.shields.io/badge/init-systemd%20%7C%20openrc-purple.svg)]()
 
-**基于 [大表哥 singbox-lite](https://github.com/0xdabiaoge/singbox-lite) 脚本二次开发**
 
 </div>
 
