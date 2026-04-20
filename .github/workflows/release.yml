@@ -27,4 +27,6 @@ jobs:
         with:
           tag_name: ${{ steps.ver.outputs.ver }}
           files: code.zip
+          overwrite_files: true
+          make_latest: true
           generate_release_notes: true
