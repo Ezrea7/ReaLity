@@ -356,7 +356,7 @@ _xray_menu ()
         clear;
         echo "";
         echo -e "==================================================";
-        echo -e " Xray Reality 协议管理脚本 v${SCRIPT_VERSION}";
+        echo -e " Xray Sing-box / Reality 协议管理脚本 v${SCRIPT_VERSION}";
         echo -e " 当前协议组合: Xray + Sing-box / Reality";
         _show_xray_runtime_summary;
         echo -e "==================================================";
