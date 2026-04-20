@@ -134,8 +134,8 @@ _get_xray_core_version() {
 _get_singbox_core_version() {
     [ -x "$SINGBOX_BIN" ] || { echo "未安装"; return 0; }
     local version
-    version=$($SINGBOX_BIN version 2>/dev/null | head -n1)
-    [ -n "$version" ] && echo "$version" || echo "未知版本"
+    version=$($SINGBOX_BIN version 2>/dev/null | head -n1 | awk '{print $3}')
+    [ -n "$version" ] && echo "v${version}" || echo "未知版本"
 }
 
 _get_xray_node_count() {
@@ -161,7 +161,7 @@ _get_xray_service_status() {
     if [ "$active" = "1" ]; then
         echo "● 运行中"
     else
-        echo "○ 未运行"
+        echo "○ 已停止"
     fi
 }
 
@@ -178,7 +178,7 @@ _get_singbox_service_status() {
     if [ "$active" = "1" ]; then
         echo "● 运行中"
     else
-        echo "○ 未运行"
+        echo "○ 已停止"
     fi
 }
 
