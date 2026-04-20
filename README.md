@@ -40,7 +40,7 @@
 ### 一键安装脚本
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Ezrea7/Xray/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Ezrea7/ReaLity/main/install.sh)
 ```
 
 ## 快捷指令

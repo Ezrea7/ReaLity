@@ -14,6 +14,6 @@ Xray 轻量菜单脚本
   xtls
 
 GitHub:
-  https://github.com/Ezrea7/Xray
+  https://github.com/Ezrea7/ReaLity
 EOF
 }
