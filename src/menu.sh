@@ -33,7 +33,6 @@ _input_port ()
             _error "无效端口号。";
             continue;
         fi;
-        _check_port_conflict "$port" && continue;
         echo "$port";
         return 0;
     done

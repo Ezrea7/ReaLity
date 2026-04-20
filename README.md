@@ -67,6 +67,11 @@ head -n 4 /usr/local/etc/xray/sh/xray.sh
 /usr/local/etc/xray/sh/xray.sh
 ```
 
+### 端口说明
+
+当前脚本仅校验端口格式（1-65535），不再额外拦截“端口已被占用”或“系统进程占用”场景。
+如端口确实冲突，由实际服务启动结果决定。
+
 ## Quantumult X 配置示例
 
 ### SS2022 + Reality
