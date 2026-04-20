@@ -1,4 +1,4 @@
-# Xray xTLS + Reality 一键管理脚本
+# Xray SingBox + Reality 一键管理脚本
 
 <div align="center">
 
@@ -11,7 +11,7 @@
 
 </div>
 
-> 当前发布版本：`v0.3.29`
+> 当前发布版本：`v0.3.30`
 
 ## ✨ 功能特性
 
