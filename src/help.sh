@@ -1,16 +1,19 @@
 #!/bin/bash
 
+# 保持最小帮助，仅提示菜单式使用
 show_help() {
     cat <<'EOF'
-Xray 仓库骨架版
+Xray 轻量菜单脚本
 
-当前阶段：
-- 已完成 GitHub 仓库初始化
-- 已完成基础安装器与入口脚本
-- 已开始从单文件核心脚本向模块化拆分
+当前仓库设计：
+- 默认使用菜单
+- 快捷命令入口：xtls / XTLS
+- 不扩展复杂命令体系
 
-当前建议使用方式：
-- 运行 xray 进入菜单
-- 后续逐步补充命令帮助
+常用方式：
+  xtls
+
+GitHub:
+  https://github.com/Ezrea7/Xray
 EOF
 }

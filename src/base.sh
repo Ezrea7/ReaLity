@@ -4,12 +4,12 @@
 #      Xray base module
 # ============================================================
 
-SCRIPT_VERSION="0.3.20"
+SCRIPT_VERSION="$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo 0.3.21)"
 SCRIPT_CMD_NAME="xtls"
 SCRIPT_CMD_ALIAS="XTLS"
 SCRIPT_INSTALL_PATH="/usr/local/bin/${SCRIPT_CMD_NAME}"
 SCRIPT_ALIAS_PATH="/usr/local/bin/${SCRIPT_CMD_ALIAS}"
-SCRIPT_UPDATE_URL="https://github.com/Ezrea7/Xray/archive/refs/heads/main.zip"
+SCRIPT_UPDATE_URL=""
 SELF_SCRIPT_PATH="$(readlink -f "$0" 2>/dev/null || printf '%s' "$0")"
 XRAY_BIN="/usr/local/bin/xray"
 XRAY_DIR="/usr/local/etc/xray"

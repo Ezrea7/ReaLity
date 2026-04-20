@@ -1,17 +1,25 @@
 #!/bin/bash
 
-_download_to () 
-{ 
-    local url="$1" output="$2";
+_download_to() {
+    local url="$1" output="$2"
     if command -v curl > /dev/null 2>&1; then
-        curl -LfsS "$url" -o "$output";
+        curl -LfsS "$url" -o "$output"
     else
         if command -v wget > /dev/null 2>&1; then
-            wget -q "$url" -O "$output";
+            wget -q "$url" -O "$output"
         else
-            return 1;
-        fi;
+            return 1
+        fi
     fi
+}
+
+_get_latest_repo_release_zip() {
+    local api="https://api.github.com/repos/Ezrea7/Xray/releases/latest"
+    local url
+    url=$(_download_to "$api" /tmp/xtls_release.$$ 2>/dev/null || true)
+    url=$(curl -fsSL "$api" | grep 'browser_download_url' | grep 'code.zip' | head -n1 | cut -d '"' -f4)
+    [ -n "$url" ] || return 1
+    printf '%s' "$url"
 }
 _pkg_install () 
 { 
@@ -127,37 +135,45 @@ _install_or_update_xray ()
 }
 _update_script_self () 
 { 
-    [ -n "$SCRIPT_UPDATE_URL" ] || { 
-        _warn "当前脚本未配置远程更新地址，请手动替换脚本文件。";
-        return 1
-    };
-    local tmp="/tmp/${SCRIPT_CMD_NAME}.update.$$";
-    local src;
-    src="$(readlink -f "$0" 2> /dev/null || printf '%s' "$0")";
-    _download_to "$SCRIPT_UPDATE_URL" "$tmp" 2> /dev/null || { 
-        rm -f "$tmp";
-        _error "下载更新失败。";
-        return 1
-    };
-    if ! bash -n "$tmp" 2> /dev/null; then
-        rm -f "$tmp";
-        _error "更新文件语法校验失败，已取消覆盖。";
+    local tmpdir tmpzip relurl src staged_dir;
+    relurl=$(_get_latest_repo_release_zip) || { 
+        _error "获取最新 Release 失败。";
         return 1;
-    fi;
+    };
+    tmpdir=$(mktemp -d);
+    tmpzip="$tmpdir/code.zip";
+    src="$(readlink -f "$0" 2> /dev/null || printf '%s' "$0")";
+    _download_to "$relurl" "$tmpzip" 2> /dev/null || { 
+        rm -rf "$tmpdir";
+        _error "下载更新失败。";
+        return 1;
+    };
+    unzip -qo "$tmpzip" -d "$tmpdir" || { 
+        rm -rf "$tmpdir";
+        _error "更新包解压失败。";
+        return 1;
+    };
+    staged_dir="$tmpdir";
+    [ -f "$staged_dir/xray.sh" ] || { 
+        rm -rf "$tmpdir";
+        _error "更新包内容不完整。";
+        return 1;
+    };
     mkdir -p "$(dirname "$SCRIPT_INSTALL_PATH")" 2> /dev/null || true;
-    cp -f "$tmp" "$SCRIPT_INSTALL_PATH" || { 
-        rm -f "$tmp";
+    cp -rf "$staged_dir"/* "$(dirname "$src")"/ 2> /dev/null || true;
+    cp -f "$staged_dir/xray.sh" "$SCRIPT_INSTALL_PATH" || { 
+        rm -rf "$tmpdir";
         _error "写入 ${SCRIPT_INSTALL_PATH} 失败。";
-        return 1
+        return 1;
     };
     chmod +x "$SCRIPT_INSTALL_PATH" 2> /dev/null || true;
     if [ -n "$src" ] && [ -f "$src" ] && [ "$src" != "$SCRIPT_INSTALL_PATH" ]; then
-        cp -f "$tmp" "$src" 2> /dev/null || true;
+        cp -f "$staged_dir/xray.sh" "$src" 2> /dev/null || true;
         chmod +x "$src" 2> /dev/null || true;
     fi;
-    rm -f "$tmp";
     ln -sf "$SCRIPT_INSTALL_PATH" "$SCRIPT_ALIAS_PATH" 2> /dev/null || cp -f "$SCRIPT_INSTALL_PATH" "$SCRIPT_ALIAS_PATH" 2> /dev/null || true;
     chmod +x "$SCRIPT_ALIAS_PATH" 2> /dev/null || true;
+    rm -rf "$tmpdir";
     _success "脚本更新完成。当前快捷命令: ${SCRIPT_CMD_NAME} / ${SCRIPT_CMD_ALIAS}";
     _warn "请重新运行 ${SCRIPT_CMD_NAME} 或 ${SCRIPT_CMD_ALIAS} 以加载新版本。"
 }

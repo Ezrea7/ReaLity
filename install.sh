@@ -8,7 +8,6 @@ TARGET_DIR="/usr/local/etc/xray/sh"
 BIN_LINK="/usr/local/bin/xtls"
 ALIAS_LINK="/usr/local/bin/XTLS"
 SELF_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
-ARCHIVE_URL="https://github.com/Ezrea7/Xray/archive/refs/heads/main.zip"
 TMPDIR=""
 
 install_pkg() {
@@ -35,6 +34,14 @@ download_to() {
   fi
 }
 
+get_latest_release_zip() {
+  local api="https://api.github.com/repos/Ezrea7/Xray/releases/latest"
+  local url
+  url=$(curl -fsSL "$api" | grep 'browser_download_url' | grep 'code.zip' | head -n1 | cut -d '"' -f4)
+  [ -n "$url" ] || return 1
+  printf '%s' "$url"
+}
+
 cleanup() {
   [ -n "$TMPDIR" ] && rm -rf "$TMPDIR" >/dev/null 2>&1 || true
 }
@@ -49,15 +56,16 @@ need_cmd curl curl
 need_cmd unzip unzip
 need_cmd bash bash
 
-if [ -f "$SELF_DIR/src/core.sh" ] && [ -f "$SELF_DIR/xray.sh" ]; then
+if [ -f "$SELF_DIR/src/core.sh" ] && [ -f "$SELF_DIR/xray.sh" ] && [ -f "$SELF_DIR/VERSION" ]; then
   SOURCE_DIR="$SELF_DIR"
 else
   TMPDIR=$(mktemp -d)
   ZIPFILE="$TMPDIR/xray.zip"
-  download_to "$ARCHIVE_URL" "$ZIPFILE"
+  RELEASE_URL=$(get_latest_release_zip) || { echo "获取最新 Release 失败"; exit 1; }
+  download_to "$RELEASE_URL" "$ZIPFILE"
   unzip -qo "$ZIPFILE" -d "$TMPDIR"
-  SOURCE_DIR="$(find "$TMPDIR" -maxdepth 1 -type d -name 'Xray-*' | head -n1)"
-  [ -n "$SOURCE_DIR" ] || { echo "下载仓库骨架失败"; exit 1; }
+  SOURCE_DIR="$TMPDIR"
+  [ -f "$SOURCE_DIR/xray.sh" ] || { echo "Release 包内容不完整"; exit 1; }
 fi
 
 mkdir -p "$TARGET_DIR"
@@ -71,4 +79,4 @@ echo "脚本目录: $TARGET_DIR"
 echo "快捷命令: $BIN_LINK"
 echo "快捷命令: $ALIAS_LINK"
 echo -e "运行方式: ${YELLOW}xtls${NC}"
-echo "当前版本: $(grep -E '^[[:space:]]*is_sh_ver=' "$TARGET_DIR/xray.sh" | head -n1 | cut -d'=' -f2 | tr -d '"')"
+echo "当前版本: v$(cat "$TARGET_DIR/VERSION" 2>/dev/null || echo unknown)"

@@ -2,7 +2,7 @@
 
 基于当前菜单式 `xray.sh` 演进的轻量化 Xray 管理脚本仓库。
 
-> 当前阶段：仓库骨架已建立，并已进入第二轮模块化拆分。
+> 当前阶段：仓库骨架已建立，并已完成第三阶段关键收尾项。
 
 ## 设计目标
 
@@ -49,8 +49,9 @@ Xray/
 轻量安装脚本。
 
 当前职责：
+- 从 GitHub Release 拉取最新 `code.zip`
 - 将仓库文件安装到目标目录
-- 建立 `/usr/local/bin/xray` 快捷入口
+- 建立 `/usr/local/bin/xtls` 与 `/usr/local/bin/XTLS` 快捷入口
 - 输出当前安装版本
 
 ### `src/base.sh`
@@ -98,7 +99,7 @@ Xray/
 ### `src/help.sh`
 当前帮助占位模块。
 
-后续会继续扩展为正式帮助说明。
+本仓库默认以菜单使用为主，不扩展复杂命令帮助体系。
 
 ### `src/config.sh`
 已拆出的配置与元数据操作模块。
@@ -167,30 +168,37 @@ xtls
 
 当前仓库已接入 GitHub Actions：
 
-- push 到 `main`
-- 自动读取 `xray.sh` 中的 `is_sh_ver`
+- 仅在推送 `v*` 标签时发布
 - 自动打包为 `code.zip`
-- 自动按版本号创建 Release
+- 自动以标签名创建 Release
+
+### 发布示例
+
+```bash
+git tag v0.3.21
+git push origin v0.3.21
+```
 
 ## 当前状态说明
 
 当前仓库已经：
 - 建立 GitHub 仓库结构
 - 完成基础安装器与入口脚本
-- 接入按版本号发布的 Release Workflow
+- 接入按标签发布的 Release Workflow
 - 完成第二轮模块化拆分（download / service / help / config / protocol / share / menu）
 - 完成第三阶段第一轮清理，引入 `base.sh`
 - 将 `core.sh` 收缩为最小壳层，实际逻辑由模块承载
+- 安装器改为从 GitHub Release 获取最新 `code.zip`
+- 更新逻辑改为按仓库 Release 更新
 - 保持现有菜单逻辑继续可运行
 
 ## 后续计划
 
 建议按以下顺序推进：
 
-1. 继续完善 `help.sh`
-2. 增强安装器（支持版本安装/Release 安装）
-3. 优化 README 与发布说明
-4. 视需要增加轻量快捷命令入口
+1. 视需要补充 VERSION 读取容错
+2. 做一次正式 tag 发布测试
+3. 继续优化 README 与发布说明
 
 ## 许可说明
 
