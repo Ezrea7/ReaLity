@@ -24,6 +24,7 @@ Xray/
 │  └─ workflows/
 │     └─ release.yml
 └─ src/
+   ├─ base.sh
    ├─ init.sh
    ├─ core.sh
    ├─ download.sh
@@ -51,6 +52,17 @@ Xray/
 - 将仓库文件安装到目标目录
 - 建立 `/usr/local/bin/xray` 快捷入口
 - 输出当前安装版本
+
+### `src/base.sh`
+第三阶段新增的基础模块。
+
+包含：
+- 全局变量
+- 颜色与输出函数
+- root 检查
+- init system 检测
+- 脚本快捷方式安装
+- IP 优先级与系统信息公共逻辑
 
 ### `src/init.sh`
 初始化入口。
@@ -167,17 +179,18 @@ xtls
 - 完成基础安装器与入口脚本
 - 接入按版本号发布的 Release Workflow
 - 完成第二轮模块化拆分（download / service / help / config / protocol / share / menu）
+- 完成第三阶段第一轮清理，引入 `base.sh`
+- 将 `core.sh` 收缩为最小壳层，实际逻辑由模块承载
 - 保持现有菜单逻辑继续可运行
 
 ## 后续计划
 
 建议按以下顺序推进：
 
-1. 清理 `src/core.sh` 中重复的基础函数与全局变量
-2. 继续收缩 `src/core.sh` 为真正的轻核心
-3. 完善 `src/help.sh`
-4. 增强安装器（支持版本安装/Release 安装）
-5. 优化 README 与发布说明
+1. 继续完善 `help.sh`
+2. 增强安装器（支持版本安装/Release 安装）
+3. 优化 README 与发布说明
+4. 视需要增加轻量快捷命令入口
 
 ## 许可说明
 
