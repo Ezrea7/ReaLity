@@ -47,6 +47,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+show_post_install_diagnose() {
+  echo ""
+  echo "安装后自检:"
+  echo "  xtls 入口: $(readlink -f "$BIN_LINK" 2>/dev/null || echo "$BIN_LINK")"
+  echo "  脚本入口: $(head -n 4 "$TARGET_DIR/xray.sh" 2>/dev/null | tail -n 1)"
+}
+
 if [ "$(id -u)" != "0" ]; then
   echo "请使用 root 运行 install.sh"
   exit 1
@@ -80,3 +87,4 @@ echo "快捷命令: $BIN_LINK"
 echo "快捷命令: $ALIAS_LINK"
 echo -e "运行方式: ${YELLOW}xtls${NC}"
 echo "当前版本: v$(cat "$TARGET_DIR/VERSION" 2>/dev/null || echo unknown)"
+show_post_install_diagnose

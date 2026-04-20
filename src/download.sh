@@ -15,9 +15,10 @@ _download_to() {
 
 _get_latest_repo_release_zip() {
     local api="https://api.github.com/repos/Ezrea7/ReaLity/releases/latest"
-    local url
-    url=$(_download_to "$api" /tmp/xtls_release.$$ 2>/dev/null || true)
-    url=$(curl -fsSL "$api" | grep 'browser_download_url' | grep 'code.zip' | head -n1 | cut -d '"' -f4)
+    local url json
+    json=$(curl -fsSL "$api" 2>/dev/null || wget -qO- "$api" 2>/dev/null || true)
+    [ -n "$json" ] || return 1
+    url=$(printf '%s' "$json" | grep 'browser_download_url' | grep 'code.zip' | head -n1 | cut -d '"' -f4)
     [ -n "$url" ] || return 1
     printf '%s' "$url"
 }

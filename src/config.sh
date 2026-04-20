@@ -24,7 +24,20 @@ _apply_xray_json_change ()
 _check_core_functions () 
 { 
     local fn missing="";
-    for fn in _atomic_modify_json _apply_xray_json_change _manage_xray_service _manage_singbox_service _init_xray_config _init_singbox_config _protocol_add_node _build_protocol_share_link;
+    for fn in \
+        _atomic_modify_json \
+        _apply_xray_json_change \
+        _manage_xray_service \
+        _manage_singbox_service \
+        _init_xray_config \
+        _init_singbox_config \
+        _install_or_update_xray \
+        _install_or_update_singbox \
+        _protocol_add_node \
+        _build_protocol_share_link \
+        _build_anytls_reality_link \
+        _show_xray_runtime_summary \
+        _choose_ip_preference; 
     do
         if ! command -v "$fn" > /dev/null 2>&1; then
             missing="$missing $fn";
