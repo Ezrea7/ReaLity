@@ -56,7 +56,7 @@ _detect_init_system() {
 
 _install_script_shortcut() {
     local src
-    src="$(readlink -f "$0" 2>/dev/null || printf '%s' "$0")"
+    src="$SCRIPT_DIR/xray.sh"
     [ -n "$src" ] && [ -f "$src" ] || return 0
 
     mkdir -p "$(dirname "$SCRIPT_INSTALL_PATH")" 2>/dev/null || true
