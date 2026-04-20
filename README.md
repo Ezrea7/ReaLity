@@ -1,18 +1,99 @@
-# Xray
+# Xray xTLS + Reality 一键管理脚本
 
-基于当前菜单式 `xray.sh` 演进的轻量化 Xray 管理脚本仓库。
+<div align="center">
 
-> 当前阶段：仓库骨架已建立，并已完成第三阶段关键收尾项。
-> 当前发布版本：`v0.3.23`
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Linux-blue.svg)]()
+[![Protocol](https://img.shields.io/badge/protocol-SS2022%2BReality-orange.svg)]()
+[![Init](https://img.shields.io/badge/init-systemd%20%7C%20openrc-purple.svg)]()
 
+**基于 [大表哥 singbox-lite](https://github.com/0xdabiaoge/singbox-lite) 脚本二次开发**
 
-## 设计目标
+</div>
 
-- **基于现有脚本继续演进**，不照抄大型命令体系
-- 保持 **稳定、轻量、高效**
-- 默认以 **交互菜单** 为主
-- 面向 **Reality / Xray 常用场景**
-- 支持 GitHub Release 分发与后续持续更新
+> 当前发布版本：`v0.3.26`
+
+## ✨ 功能特性
+
+- 🔐 **支持 VLESS + Reality / SS2022 + Reality / Trojan + Reality / VMess + Reality / AnyTLS + Reality 协议**
+- 🐧 **多发行版支持** - 支持 Alpine (OpenRC)、Debian/Ubuntu (systemd)、CentOS/Rocky/Fedora (systemd)
+- 🌐 **双栈 IP 支持** - 支持 IPv4/IPv6 优先级设置，自动检测公网 IP
+- 🛠️ **完整节点管理** - 添加、删除、修改端口、查看节点信息
+- 📱 **Quantumult X 配置** - 自动生成 Quantumult X 兼容配置格式
+- 🔄 **脚本自更新** - 一键更新脚本到最新版本
+- 🧩 **双内核支持** - 同时支持 Xray 与 Sing-box 内核管理
+- 🧹 **完整卸载** - 支持卸载 Xray / Sing-box 内核，及卸载脚本
+
+## 📋 系统要求
+
+| 项目 | 要求 |
+|------|------|
+| **操作系统** | Alpine / Debian / Ubuntu / CentOS / Rocky / Fedora 等 Linux 发行版 |
+| **包管理器** | `apk` / `apt-get` / `yum` / `dnf` 任一即可 |
+| **初始化系统** | systemd 或 OpenRC |
+| **架构** | x86_64 / AMD64 / ARM64 / ARMv7 |
+| **权限** | Root 用户权限 |
+| **网络** | 可访问 GitHub 以下载 Xray / Sing-box 核心 |
+
+## 🚀 快速开始
+
+### 一键安装脚本
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Ezrea7/Xray/main/install.sh)
+```
+
+## 快捷指令
+
+### 安装完成后，使用以下命令进入管理菜单：
+
+```bash
+xtls
+```
+
+## Quantumult X 配置示例
+
+### SS2022 + Reality
+
+```text
+shadowsocks=服务器IP:端口, method=2022-blake3-aes-128-gcm, password=密码, obfs=over-tls, obfs-host=伪装域名, reality-base64-pubkey=公钥, reality-hex-shortid=短ID, udp-relay=true, tag=节点名称
+```
+
+### AnyTLS + Reality
+
+```text
+anytls=example.com:443, password=pwd, over-tls=true, tls-host=apple.com, reality-base64-pubkey=k4Uxez0sjl8bKaZH2Vgi8-WDFshML51QkxKFLWFIONk, reality-hex-shortid=0123456789abcdef, udp-relay=true, tag=anytls-reality-tls-01
+```
+
+### 推荐客户端：Quantumult X
+
+如需配置其他客户端，请查看脚本内生成的 JSON 配置内容。
+
+## 配置文件
+
+### Xray 核心配置文件
+
+```text
+/usr/local/etc/xray/config.json
+```
+
+### Sing-box 核心配置文件
+
+```text
+/usr/local/etc/sing-box/config.json
+```
+
+### 节点源数据
+
+```text
+/usr/local/etc/xtls/metadata.json
+```
+
+### IP 优先级配置
+
+```text
+/usr/local/etc/xray/ip_preference.conf
+```
 
 ## 当前仓库结构
 
@@ -20,6 +101,7 @@
 Xray/
 ├─ README.md
 ├─ LICENSE
+├─ VERSION
 ├─ install.sh
 ├─ xray.sh
 ├─ .github/
@@ -31,6 +113,7 @@ Xray/
    ├─ core.sh
    ├─ download.sh
    ├─ service.sh
+   ├─ singbox.sh
    ├─ help.sh
    ├─ config.sh
    ├─ protocol.sh
@@ -38,173 +121,21 @@ Xray/
    └─ menu.sh
 ```
 
-## 文件说明
-
-### `xray.sh`
-仓库入口脚本。
-
-当前职责：
-- 提供版本号
-- 将参数传递给 `src/init.sh`
-
-### `install.sh`
-轻量安装脚本。
-
-当前职责：
-- 从 GitHub Release 拉取最新 `code.zip`
-- 将仓库文件安装到目标目录
-- 建立 `/usr/local/bin/xtls` 与 `/usr/local/bin/XTLS` 快捷入口
-- 输出当前安装版本
-
-### `src/base.sh`
-第三阶段新增的基础模块。
-
-包含：
-- 全局变量
-- 颜色与输出函数
-- root 检查
-- init system 检测
-- 脚本快捷方式安装
-- IP 优先级与系统信息公共逻辑
-
-### `src/init.sh`
-初始化入口。
-
-当前职责：
-- 初始化全局变量
-- 载入已拆分模块
-- 最后载入当前单体核心 `src/core.sh`
-
-### `src/core.sh`
-当前核心主脚本。
-
-当前仍承载大部分菜单与协议逻辑，后续继续拆分。
-
-### `src/download.sh`
-已拆出的下载与更新模块。
-
-包含：
-- 依赖安装
-- 下载封装
-- Xray 安装/更新
-- 脚本自更新
-
-### `src/service.sh`
-已拆出的服务与卸载模块。
-
-包含：
-- Xray systemd / openrc service 生成
-- Sing-box systemd / openrc service 生成
-- Xray / Sing-box 服务启动/停止/重启/状态
-- Xray / Sing-box 卸载
-- 脚本卸载
-
-### `src/help.sh`
-当前帮助占位模块。
-
-本仓库默认以菜单使用为主，不扩展复杂命令帮助体系。
-
-### `src/config.sh`
-已拆出的配置与元数据操作模块。
-
-包含：
-- JSON 修改
-- 端口冲突检查
-- 配置初始化
-- 元数据读写
-- 节点索引与查询
-
-### `src/protocol.sh`
-已拆出的协议实现模块。
-
-包含：
-- Reality 密钥生成
-- Sing-box AnyTLS + Reality 密钥生成
-- SS2022 / Trojan / VMess / VLESS / AnyTLS 的入站构建
-- 协议添加逻辑
-
-### `src/share.sh`
-已拆出的分享链接模块。
-
-包含：
-- Quantumult X 链接生成
-- VLESS 标准分享链接生成
-- AnyTLS + Reality Quantumult X 链接生成
-- 分享链接展示
-
-### `src/menu.sh`
-已拆出的交互菜单模块。
-
-包含：
-- 输入交互
-- 节点查看/删除/改端口
-- 添加协议菜单
-- 主菜单入口
-
-## 安装方式（当前骨架版）
-
-### 一键安装
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Ezrea7/Xray/main/install.sh)
-```
-
-### 本地安装
-在仓库目录执行：
-
-```bash
-bash install.sh
-```
-
-默认安装到：
-
-- `/usr/local/etc/xray/sh/`
-- `/usr/local/bin/xtls`
-- `/usr/local/bin/XTLS`
-
-### 运行
-安装完成后：
-
-```bash
-xtls
-```
-
 ## 发布方式
-
-当前仓库已接入 GitHub Actions：
 
 - push 到 `main` 默认发行
 - 自动读取 `VERSION`
 - 自动打包为 `code.zip`
 - 自动按版本号创建 / 更新 Release
 
-### 当前约定
+## 更新日志
 
-每次提交默认同步提升 `VERSION`，以保证安装与更新时可直观看到最新版本。
+- `0.3.26`：按当前仓库实际功能重写 README，修正安装指令、路径、协议说明与发行说明
+- `0.3.25`：统一 Xray / Sing-box 状态显示为 未安装 / 已停止 / 运行中
+- `0.3.24`：修复 `xtls` 快捷命令自指向问题
+- `0.3.23`：发行流程改为 main 默认发行，并增强 Release 资产覆盖
+- `0.3.22`：加入 Sing-box 内核支持与 AnyTLS + Reality 协议支持
 
-## 当前状态说明
+## License
 
-当前仓库已经：
-- 建立 GitHub 仓库结构
-- 完成基础安装器与入口脚本
-- 接入按标签发布的 Release Workflow
-- 完成模块化拆分（download / service / help / config / protocol / share / menu）
-- 引入 `base.sh`
-- 将 `core.sh` 收缩为最小壳层，实际逻辑由模块承载
-- 安装器改为从 GitHub Release 获取最新 `code.zip`
-- 更新逻辑改为按仓库 Release 更新
-- 已加入 Sing-box 内核安装 / 服务 / 卸载能力
-- 已加入 AnyTLS + Reality 协议支持（基于 Sing-box）
-- 保持现有菜单逻辑继续可运行
-
-## 后续计划
-
-建议按以下顺序推进：
-
-1. 视需要补充 VERSION 读取容错
-2. 做一次正式 tag 发布测试
-3. 继续优化 README 与发布说明
-
-## 许可说明
-
-当前仓库仍处于整理与重构阶段，请根据最终发布需求确认许可证文本。
+MIT License

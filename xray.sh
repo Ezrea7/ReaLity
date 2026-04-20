@@ -1,7 +1,7 @@
 #!/bin/bash
 
 args="$@"
-is_sh_ver="v$(cat "$(CDPATH= cd -- "$(dirname "$0")" && pwd)/VERSION" 2>/dev/null || echo 0.3.23)"
+is_sh_ver="v$(cat "$(CDPATH= cd -- "$(dirname "$0")" && pwd)/VERSION" 2>/dev/null || echo 0.3.26)"
 
 if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR" ]; then
     :
