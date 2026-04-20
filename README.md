@@ -10,7 +10,7 @@
 
 </div>
 
-> 当前发布版本：`v0.3.30`
+> 当前发布版本：`v0.3.35`
 
 ## ✨ 功能特性
 
@@ -119,6 +119,11 @@ Xray/
    ├─ share.sh
    └─ menu.sh
 ```
+
+### 模块职责说明
+
+- `src/service.sh`：统一负责 Xray / Sing-box 的服务、状态、卸载、运行摘要
+- `src/singbox.sh`：Sing-box 轻占位模块，作为后续扩展保留位，避免与 `src/service.sh` 重复维护服务逻辑
 
 ## 发布方式
 
