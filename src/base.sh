@@ -140,6 +140,40 @@ _get_public_ip() {
     echo "$ip"
 }
 
+_choose_ip_preference() {
+    local current ip4 ip6 display_pref choice
+    current=$(_get_ip_preference)
+    ip4=$(_fetch_ip_by_proto ipv4)
+    ip6=$(_fetch_ip_by_proto ipv6)
+    [ "$current" = "ipv6" ] && display_pref="IPv6" || display_pref="IPv4"
+
+    echo ""
+    echo -e "${CYAN}当前网络优先级设置: ${NC}${GREEN}${display_pref} 优先${NC}"
+    echo ""
+    echo -e "检测到 IPv4 地址: ${YELLOW}${ip4:-无}${NC}"
+    echo -e "检测到 IPv6 地址: ${YELLOW}${ip6:-无}${NC}"
+    echo ""
+    echo "请选择网络优先级:"
+    echo -e "  ${GREEN}[1]${NC} IPv4 优先"
+    echo -e "  ${GREEN}[2]${NC} IPv6 优先"
+    echo -e "  ${YELLOW}[0]${NC} 返回上一级"
+    read -p "请选择 [0-2]: " choice
+
+    case "$choice" in
+        1)
+            [ -n "$ip4" ] || { _error "当前未检测到可用的 IPv4 地址，无法设置 IPv4 优先。"; _pause; return 0; }
+            _set_ip_preference ipv4 && _success "IPv4 优先设置完成。" || _error "设置 IPv4 优先失败。"
+            ;;
+        2)
+            [ -n "$ip6" ] || { _error "当前未检测到可用的 IPv6 地址，无法设置 IPv6 优先。"; _pause; return 0; }
+            _set_ip_preference ipv6 && _success "IPv6 优先设置完成。" || _error "设置 IPv6 优先失败。"
+            ;;
+        0) return 0 ;;
+        *) _error "无效输入。" ;;
+    esac
+    _pause
+}
+
 _init_server_ip() {
     server_ip=$(_get_public_ip)
     if [ -z "$server_ip" ] || [ "$server_ip" = "null" ]; then
