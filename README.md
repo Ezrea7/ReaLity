@@ -42,6 +42,16 @@
 bash <(curl -fsSL https://raw.githubusercontent.com/Ezrea7/ReaLity/main/install.sh)
 ```
 
+
+
+## 快捷指令
+
+### 安装完成后，使用以下命令进入管理菜单：
+
+```bash
+xtls
+```
+
 ### 安装完成后的快速检查
 
 如需确认脚本是否安装到正确位置，可手动执行：
@@ -55,14 +65,6 @@ head -n 4 /usr/local/etc/xray/sh/xray.sh
 
 ```text
 /usr/local/etc/xray/sh/xray.sh
-```
-
-## 快捷指令
-
-### 安装完成后，使用以下命令进入管理菜单：
-
-```bash
-xtls
 ```
 
 ## Quantumult X 配置示例
