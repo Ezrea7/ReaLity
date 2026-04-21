@@ -129,9 +129,9 @@ _ss2022_reality_method ()
     echo -e "  ${GREEN}[2]${NC} aes-128-gcm"
     read -p "请选择 [1-2] (默认: 1): " choice
     case "${choice:-1}" in
-        1) echo "2022-blake3-aes-128-gcm" ;;
-        2) echo "aes-128-gcm" ;;
-        *) _warn "无效选择，已使用默认加密方式 2022-blake3-aes-128-gcm。"; echo "2022-blake3-aes-128-gcm" ;;
+        1) SS_REALITY_METHOD="2022-blake3-aes-128-gcm" ;;
+        2) SS_REALITY_METHOD="aes-128-gcm" ;;
+        *) _warn "无效选择，已使用默认加密方式 2022-blake3-aes-128-gcm。"; SS_REALITY_METHOD="2022-blake3-aes-128-gcm" ;;
     esac
 }
 _ss2022_reality_password () 
@@ -163,7 +163,8 @@ _add_ss2022_reality ()
     protocol="ss2022_reality";
     node_ip=$(_input_node_ip);
     port=$(_input_port);
-    method=$(_ss2022_reality_method);
+    _ss2022_reality_method;
+    method="$SS_REALITY_METHOD";
     sni=$(_input_sni "$DEFAULT_SNI");
     password=$(_ss2022_reality_password);
     _generate_reality_keys || return 1;
