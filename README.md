@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Linux-blue.svg)]()
-[![Protocol](https://img.shields.io/badge/protocol-SS2022%2BReality-orange.svg)]()
+[![Protocol](https://img.shields.io/badge/protocol-SS%2BReaLity-orange.svg)]()
 [![Init](https://img.shields.io/badge/init-systemd%20%7C%20openrc-purple.svg)]()
 
 
@@ -14,7 +14,7 @@
 
 ## ✨ 功能特性
 
-- 🔐 **支持 VLESS + Reality / SS2022 + Reality / Trojan + Reality / VMess + Reality / AnyTLS + Reality 协议**
+- 🔐 **支持 VLESS + Reality / SS + ReaLity / Trojan + Reality / VMess + Reality / AnyTLS + Reality 协议**
 - 🐧 **多发行版支持** - 支持 Alpine (OpenRC)、Debian/Ubuntu (systemd)、CentOS/Rocky/Fedora (systemd)
 - 🌐 **双栈 IP 支持** - 支持 IPv4/IPv6 优先级设置，自动检测公网 IP
 - 🛠️ **完整节点管理** - 添加、删除、修改端口、查看节点信息
@@ -74,10 +74,10 @@ head -n 4 /usr/local/etc/xray/sh/xray.sh
 
 ## Quantumult X 配置示例
 
-### SS2022 + Reality
+### SS + ReaLity
 
 ```text
-shadowsocks=服务器IP:端口, method=2022-blake3-aes-128-gcm, password=密码, obfs=over-tls, obfs-host=伪装域名, reality-base64-pubkey=公钥, reality-hex-shortid=短ID, udp-relay=true, tag=节点名称
+shadowsocks=服务器IP:端口, method=2022-blake3-aes-128-gcm 或 aes-128-gcm, password=密码, obfs=over-tls, obfs-host=伪装域名, tls-verification=false, reality-base64-pubkey=公钥, reality-hex-shortid=短ID, udp-relay=true, tag=节点名称
 ```
 
 ### AnyTLS + Reality

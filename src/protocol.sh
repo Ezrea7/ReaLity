@@ -52,7 +52,7 @@ _protocol_name ()
 { 
     case "$1" in 
         ss2022_reality)
-            echo "SS2022 + Reality"
+            echo "SS + ReaLity"
         ;;
         trojan_reality)
             echo "Trojan + Reality"
@@ -76,7 +76,7 @@ _protocol_default_name ()
     local protocol="$1" port="$2";
     case "$protocol" in 
         ss2022_reality)
-            printf 'SS2022-REALITY-%s\n' "$port"
+            printf 'SS-REALITY-%s\n' "$port"
         ;;
         trojan_reality)
             printf 'TROJAN-REALITY-%s\n' "$port"
@@ -122,7 +122,17 @@ _protocol_add_node ()
 }
 _ss2022_reality_method () 
 { 
-    echo "2022-blake3-aes-128-gcm"
+    local choice
+    echo ""
+    echo -e "${YELLOW}请选择 SS + ReaLity 加密方式:${NC}"
+    echo -e "  ${GREEN}[1]${NC} 2022-blake3-aes-128-gcm"
+    echo -e "  ${GREEN}[2]${NC} aes-128-gcm"
+    read -p "请选择 [1-2] (默认: 1): " choice
+    case "${choice:-1}" in
+        1) echo "2022-blake3-aes-128-gcm" ;;
+        2) echo "aes-128-gcm" ;;
+        *) _warn "无效选择，已使用默认加密方式 2022-blake3-aes-128-gcm。"; echo "2022-blake3-aes-128-gcm" ;;
+    esac
 }
 _ss2022_reality_password () 
 { 
@@ -153,8 +163,8 @@ _add_ss2022_reality ()
     protocol="ss2022_reality";
     node_ip=$(_input_node_ip);
     port=$(_input_port);
-    sni=$(_input_sni "$DEFAULT_SNI");
     method=$(_ss2022_reality_method);
+    sni=$(_input_sni "$DEFAULT_SNI");
     password=$(_ss2022_reality_password);
     _generate_reality_keys || return 1;
     name=$(_input_node_name "$protocol" "$port") || return 1;
@@ -163,7 +173,7 @@ _add_ss2022_reality ()
     _apply_xray_json_change ".inbounds += [$inbound]" || return 1;
     qx_link=$(_build_ss2022_reality_link "$tag" 2> /dev/null);
     _save_meta_bundle "$tag" "$name" "$qx_link" "protocol=${protocol}" "password=${password}" "publicKey=${REALITY_PUBLIC_KEY}" "shortId=${REALITY_SHORT_ID}" "server=${node_ip}" "sni=${sni}" "method=${method}";
-    _finalize_added_node "SS2022+Reality" "$name" "$tag"
+    _finalize_added_node "SS+ReaLity" "$name" "$tag"
 }
 _trojan_reality_password () 
 { 

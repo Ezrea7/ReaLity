@@ -307,7 +307,7 @@ _add_protocol_menu ()
     echo -e "${YELLOW}══════════ 选择要添加的协议 ══════════${NC}";
     echo -e " ${CYAN}【Xray 内核】${NC}";
     echo -e "  ${GREEN}[1]${NC} VLESS + Vision + Reality";
-    echo -e "  ${GREEN}[2]${NC} SS2022 + Reality";
+    echo -e "  ${GREEN}[2]${NC} SS + ReaLity";
     echo -e "  ${GREEN}[3]${NC} Trojan + Reality";
     echo -e "  ${GREEN}[4]${NC} VMess + Reality";
     echo "";
