@@ -127,53 +127,99 @@ _ss2022_reality_method ()
     echo -e "${YELLOW}请选择 SS + ReaLity 加密方式:${NC}"
     echo -e "  ${GREEN}[1]${NC} 2022-blake3-aes-128-gcm"
     echo -e "  ${GREEN}[2]${NC} aes-128-gcm"
-    read -p "请选择 [1-2] (默认: 1): " choice
+    echo -e "  ${GREEN}[3]${NC} 2022-blake3-aes-256-gcm"
+    echo -e "  ${GREEN}[4]${NC} aes-256-gcm"
+    read -p "请选择 [1-4] (默认: 1): " choice
     case "${choice:-1}" in
         1) SS_REALITY_METHOD="2022-blake3-aes-128-gcm" ;;
         2) SS_REALITY_METHOD="aes-128-gcm" ;;
+        3) SS_REALITY_METHOD="2022-blake3-aes-256-gcm" ;;
+        4) SS_REALITY_METHOD="aes-256-gcm" ;;
         *) _warn "无效选择，已使用默认加密方式 2022-blake3-aes-128-gcm。"; SS_REALITY_METHOD="2022-blake3-aes-128-gcm" ;;
     esac
 }
+
+_ss_reality_mode () 
+{ 
+    local answer
+    read -p "是否启用 Reality 传输模式？(Y/n): " answer
+    case "${answer:-Y}" in
+        n|N) SS_USE_REALITY="false" ;;
+        *) SS_USE_REALITY="true" ;;
+    esac
+}
+
 _ss2022_reality_password () 
 { 
-    openssl rand -base64 16
+    local method="$1"
+    case "$method" in
+        2022-blake3-aes-128-gcm) openssl rand -base64 16 ;;
+        2022-blake3-aes-256-gcm) openssl rand -base64 32 ;;
+        *) openssl rand -base64 16 ;;
+    esac
 }
+
 _build_ss2022_reality_inbound () 
 { 
-    local tag="$1" port="$2" method="$3" password="$4" sni="$5" private_key="$6" short_id="$7";
-    local stream;
-    stream=$(_build_reality_stream "raw" "$sni" "$private_key" "$short_id");
-    jq -n --arg tag "$tag" --argjson port "$port" --arg method "$method" --arg password "$password" --argjson stream "$stream" '
-        {
-            "tag": $tag,
-            "listen": "::",
-            "port": $port,
-            "protocol": "shadowsocks",
-            "settings": {
-                "method": $method,
-                "password": $password,
-                "network": "tcp,udp"
-            },
-            "streamSettings": $stream
-        }'
+    local tag="$1" port="$2" method="$3" password="$4" sni="$5" private_key="$6" short_id="$7" use_reality="$8";
+    if [ "$use_reality" = "true" ]; then
+        local stream
+        stream=$(_build_reality_stream "raw" "$sni" "$private_key" "$short_id")
+        jq -n --arg tag "$tag" --argjson port "$port" --arg method "$method" --arg password "$password" --argjson stream "$stream" '
+            {
+                "tag": $tag,
+                "listen": "::",
+                "port": $port,
+                "protocol": "shadowsocks",
+                "settings": {
+                    "method": $method,
+                    "password": $password,
+                    "network": "tcp,udp"
+                },
+                "streamSettings": $stream
+            }'
+    else
+        jq -n --arg tag "$tag" --argjson port "$port" --arg method "$method" --arg password "$password" '
+            {
+                "tag": $tag,
+                "listen": "0.0.0.0",
+                "port": $port,
+                "protocol": "shadowsocks",
+                "settings": {
+                    "network": "tcp,udp",
+                    "method": $method,
+                    "password": $password
+                }
+            }'
+    fi
 }
+
 _add_ss2022_reality () 
 { 
-    local protocol node_ip port sni name tag method password inbound qx_link;
+    local protocol node_ip port sni name tag method password inbound qx_link use_reality;
     protocol="ss2022_reality";
     node_ip=$(_input_node_ip);
     port=$(_input_port);
     _ss2022_reality_method;
     method="$SS_REALITY_METHOD";
-    sni=$(_input_sni "$DEFAULT_SNI");
-    password=$(_ss2022_reality_password);
-    _generate_reality_keys || return 1;
+    _ss_reality_mode;
+    use_reality="$SS_USE_REALITY";
+    if [ "$use_reality" = "true" ]; then
+        sni=$(_input_sni "$DEFAULT_SNI");
+        _generate_reality_keys || return 1;
+    else
+        sni="";
+        REALITY_PUBLIC_KEY="";
+        REALITY_SHORT_ID="";
+        REALITY_PRIVATE_KEY="";
+    fi;
+    password=$(_ss2022_reality_password "$method");
     name=$(_input_node_name "$protocol" "$port") || return 1;
     tag="$name";
-    inbound=$(_build_ss2022_reality_inbound "$tag" "$port" "$method" "$password" "$sni" "$REALITY_PRIVATE_KEY" "$REALITY_SHORT_ID");
+    inbound=$(_build_ss2022_reality_inbound "$tag" "$port" "$method" "$password" "$sni" "$REALITY_PRIVATE_KEY" "$REALITY_SHORT_ID" "$use_reality");
     _apply_xray_json_change ".inbounds += [$inbound]" || return 1;
     qx_link=$(_build_ss2022_reality_link "$tag" 2> /dev/null);
-    _save_meta_bundle "$tag" "$name" "$qx_link" "protocol=${protocol}" "password=${password}" "publicKey=${REALITY_PUBLIC_KEY}" "shortId=${REALITY_SHORT_ID}" "server=${node_ip}" "sni=${sni}" "method=${method}";
+    _save_meta_bundle "$tag" "$name" "$qx_link" "protocol=${protocol}" "password=${password}" "publicKey=${REALITY_PUBLIC_KEY}" "shortId=${REALITY_SHORT_ID}" "server=${node_ip}" "sni=${sni}" "method=${method}" "useReality=${use_reality}";
     _finalize_added_node "SS+ReaLity" "$name" "$tag"
 }
 _trojan_reality_password () 

@@ -145,7 +145,7 @@ Xray/
 ### 模块职责说明
 
 - `src/service.sh`：统一负责 Xray / Sing-box 的服务、状态、卸载、运行摘要
-- `src/singbox.sh`：Sing-box 轻占位模块，作为后续扩展保留位，避免与 `src/service.sh` 重复维护服务逻辑
+- `src/singbox.sh`：Sing-box 轻占位模块，所有服务管理逻辑已统一收敛到 `src/service.sh`，此处不承载重复实现
 
 ## 发布方式
 
